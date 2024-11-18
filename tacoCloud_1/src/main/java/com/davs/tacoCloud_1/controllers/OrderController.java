@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 
+import com.davs.tacoCloud_1.data.OrderRepository;
 import com.davs.tacoCloud_1.models.TacoOrder;
 
 import jakarta.validation.Valid;
@@ -19,6 +20,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RequestMapping("/orders")
 @SessionAttributes("tacoOrder")
 public class OrderController {
+
+    private OrderRepository orderRepo;
+
+    public OrderController(OrderRepository orderRepo) {
+      this.orderRepo = orderRepo;
+    }
 
     @GetMapping("/current")
     public String orderForm() {
@@ -33,7 +40,7 @@ public class OrderController {
       return "orderForm";
     }
 
-    log.info("Order submitted: {}", order);
+    orderRepo.save(order);
     sessionStatus.setComplete();
 
     return "redirect:/";
