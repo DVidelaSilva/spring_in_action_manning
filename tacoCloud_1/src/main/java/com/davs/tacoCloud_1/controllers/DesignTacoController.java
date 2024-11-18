@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import com.davs.tacoCloud_1.models.Ingredient;
 import com.davs.tacoCloud_1.models.Ingredient.Type;
 import com.davs.tacoCloud_1.models.TacoOrder;
+
 import com.davs.tacoCloud_1.models.Taco;
 import com.davs.tacoCloud_1.data.IngredientRepository;
 
@@ -27,20 +28,18 @@ import lombok.extern.slf4j.Slf4j;
 
 
 
-@Slf4j
 @Controller
 @RequestMapping("/design")
 @SessionAttributes("tacoOrder")
 public class DesignTacoController {
 
+  private final IngredientRepository ingredientRepo;
 
-    private final IngredientRepository ingredientRepo;
-
-    @Autowired
-    public DesignTacoController(IngredientRepository ingredientRepo) {
-        this.ingredientRepo = ingredientRepo;
-    }
-
+  @Autowired
+  public DesignTacoController(
+        IngredientRepository ingredientRepo) {
+    this.ingredientRepo = ingredientRepo;
+  }
 
   @ModelAttribute
   public void addIngredientsToModel(Model model) {
@@ -54,44 +53,41 @@ public class DesignTacoController {
     }
   }
 
+  @ModelAttribute(name = "tacoOrder")
+  public TacoOrder order() {
+    return new TacoOrder();
+  }
 
-    @ModelAttribute(name = "tacoOrder")
-    public TacoOrder order() {
-        return new TacoOrder();
+  @ModelAttribute(name = "taco")
+  public Taco taco() {
+    return new Taco();
+  }
+
+  @GetMapping
+  public String showDesignForm() {
+    return "design";
+  }
+
+  @PostMapping
+  public String processTaco(
+      @Valid Taco taco, Errors errors,
+      @ModelAttribute TacoOrder tacoOrder) {
+
+    if (errors.hasErrors()) {
+      return "design";
     }
 
-    @ModelAttribute(name = "taco")
-    public Taco taco() {
-        return new Taco();
-    }
+    tacoOrder.addTaco(taco);
 
-    @GetMapping
-    public String showDesignForm() {
-        return "design";
-    }
+    return "redirect:/orders/current";
+  }
 
-    @PostMapping
-    public String processTaco(
-            @Valid Taco taco, Errors errors,
-            @ModelAttribute TacoOrder tacoOrder) {
-        
-      if (errors.hasErrors()) {
-        return "design";
-      }
-   
-      tacoOrder.addTaco(taco);
-     
-   
-      return "redirect:/orders/current";
-    }
-
-    private Iterable<Ingredient> filterByType(
+  private Iterable<Ingredient> filterByType(
       List<Ingredient> ingredients, Type type) {
     return ingredients
               .stream()
               .filter(x -> x.getType().equals(type))
               .collect(Collectors.toList());
   }
-
 
 }
